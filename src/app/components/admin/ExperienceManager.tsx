@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Plus, Edit, Trash2, X, Save } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Save, Link as LinkIcon, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import type { Experience } from '@/types/database';
+import type { Experience, Certificate } from '@/types/database';
 import { motion, AnimatePresence } from 'motion/react';
 
 export function ExperienceManager() {
@@ -19,7 +19,10 @@ export function ExperienceManager() {
     is_current: false,
     technologies: [],
     order_index: 0,
+    certificates: [],
   });
+  const [newCertUrl, setNewCertUrl] = useState('');
+  const [newCertAlt, setNewCertAlt] = useState('');
 
   useEffect(() => {
     fetchExperiences();
@@ -40,6 +43,35 @@ export function ExperienceManager() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const addCertificate = () => {
+    if (!newCertUrl.trim()) {
+      toast.error('Please enter a certificate URL');
+      return;
+    }
+
+    const newCert: Certificate = {
+      url: newCertUrl.trim(),
+      alt: newCertAlt.trim() || undefined,
+    };
+
+    setFormData({
+      ...formData,
+      certificates: [...(formData.certificates || []), newCert],
+    });
+
+    setNewCertUrl('');
+    setNewCertAlt('');
+    toast.success('Certificate added!');
+  };
+
+  const removeCertificate = (index: number) => {
+    setFormData({
+      ...formData,
+      certificates: formData.certificates?.filter((_, i) => i !== index) || [],
+    });
+    toast.success('Certificate removed!');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -108,7 +140,10 @@ export function ExperienceManager() {
       is_current: false,
       technologies: [],
       order_index: 0,
+      certificates: [],
     });
+    setNewCertUrl('');
+    setNewCertAlt('');
     setEditingExp(null);
     setShowForm(false);
   };
@@ -149,7 +184,7 @@ export function ExperienceManager() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-2xl w-full p-6 my-8"
+              className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-2xl w-full p-6 my-8 max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">
@@ -239,10 +274,89 @@ export function ExperienceManager() {
                   <input
                     type="text"
                     value={formData.technologies?.join(', ') || ''}
-                    onChange={(e) => setFormData({ ...formData, technologies: e.target.value.split(',').map(s => s.trim()) })}
+                    onChange={(e) => setFormData({ ...formData, technologies: e.target.value.split(',').map(s => s.trim()).filter(s => s) })}
                     className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="React, TypeScript, Node.js"
                   />
+                </div>
+
+                {/* Multiple Certificates Section */}
+                <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                      <ImageIcon className="w-4 h-4 inline mr-1" />
+                      Certificates ({formData.certificates?.length || 0})
+                    </label>
+                  </div>
+
+                  {/* Add Certificate Form */}
+                  <div className="bg-slate-100 dark:bg-slate-700/50 rounded-lg p-4 space-y-3">
+                    <div>
+                      <input
+                        type="url"
+                        value={newCertUrl}
+                        onChange={(e) => setNewCertUrl(e.target.value)}
+                        placeholder="https://example.com/certificate.jpg"
+                        className="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addCertificate();
+                          }
+                        }}
+                      />
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        Paste URL from Imgur, Google Drive, or any image hosting
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newCertAlt}
+                        onChange={(e) => setNewCertAlt(e.target.value)}
+                        placeholder="Alt text (optional)"
+                        className="flex-1 px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={addCertificate}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center space-x-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Add</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Certificate List */}
+                  {formData.certificates && formData.certificates.length > 0 && (
+                    <div className="grid grid-cols-2 gap-3">
+                      {formData.certificates.map((cert, idx) => (
+                        <div key={idx} className="relative group">
+                          <img
+                            src={cert.url}
+                            alt={cert.alt || `Certificate ${idx + 1}`}
+                            className="w-full h-32 object-cover rounded-lg"
+                            onError={(e) => {
+                              e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="150"%3E%3Crect fill="%23ddd" width="200" height="150"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="12" dy="10.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3EInvalid URL%3C/text%3E%3C/svg%3E';
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeCertificate(idx)}
+                            className="absolute top-1 right-1 p-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                          {cert.alt && (
+                            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 truncate">
+                              {cert.alt}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex space-x-3 pt-4">
@@ -270,7 +384,7 @@ export function ExperienceManager() {
       <div className="grid grid-cols-1 gap-4">
         {experiences.map((exp) => (
           <div key={exp.id} className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">{exp.position}</h3>
                 <p className="text-blue-600 dark:text-blue-400 font-semibold mb-2">{exp.company}</p>
@@ -284,8 +398,38 @@ export function ExperienceManager() {
                     ))}
                   </div>
                 )}
+                {exp.certificates && exp.certificates.length > 0 && (
+                  <div className="flex items-center gap-2 mt-3">
+                    <ImageIcon className="w-4 h-4 text-slate-500" />
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      {exp.certificates.length} certificate{exp.certificates.length > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                )}
               </div>
-              <div className="flex space-x-2 ml-4">
+              
+              {exp.certificates && exp.certificates.length > 0 && (
+                <div className="flex gap-2 flex-shrink-0">
+                  {exp.certificates.slice(0, 2).map((cert, idx) => (
+                    <div key={idx} className="w-20 h-16 rounded-lg overflow-hidden">
+                      <img
+                        src={cert.url}
+                        alt={cert.alt || 'Certificate'}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                  {exp.certificates.length > 2 && (
+                    <div className="w-20 h-16 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                      <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                        +{exp.certificates.length - 2}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              <div className="flex space-x-2 ml-4 flex-shrink-0">
                 <button onClick={() => handleEdit(exp)} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
                   <Edit className="w-4 h-4" />
                 </button>
