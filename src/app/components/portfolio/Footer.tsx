@@ -70,9 +70,9 @@ export function Footer({ socialLinks }: FooterProps) {
           {/* Copyright */}
           <div className="text-center">
             <p className="text-slate-600 dark:text-slate-400 text-sm flex items-center justify-center space-x-1">
-              <span>© {currentYear} Portfolio. Made with</span>
+              <span>© {currentYear} Paulus Aditya Portfolio.</span>
               <Heart className="w-4 h-4 text-red-500 fill-current" />
-              <span>using React & Tailwind CSS</span>
+              <span>React</span>
             </p>
           </div>
         </div>

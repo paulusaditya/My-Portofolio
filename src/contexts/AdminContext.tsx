@@ -20,7 +20,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = (password: string): boolean => {
-    const correctPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'Paulus21';
+    const correctPassword = import.meta.env.VITE_ADMIN_PASSWORD;
     
     if (password === correctPassword) {
       setIsAdmin(true);
