@@ -8,16 +8,6 @@ interface NavigationProps {
   socialLinks: SocialLink[];
 }
 
-const navIcons = {
-  Home,
-  User,
-  Code,
-  Briefcase,
-  Award,
-  Folder,
-  Mail,
-};
-
 export function Navigation({ socialLinks }: NavigationProps) {
   const { theme, toggleTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -35,28 +25,38 @@ export function Navigation({ socialLinks }: NavigationProps) {
   ];
 
   useEffect(() => {
+    let ticking = false;
+    
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 20);
 
-      // Detect active section
-      const sections = navItems.map(item => item.href.substring(1));
-      const scrollPosition = window.scrollY + 100;
+          // Detect active section - OPTIMIZED
+          const sections = navItems.map(item => item.href.substring(1));
+          const scrollPosition = window.scrollY + 100;
 
-      for (const section of sections) {
-        const element = document.getElementById(section);
-        if (element) {
-          const offsetTop = element.offsetTop;
-          const offsetBottom = offsetTop + element.offsetHeight;
+          for (const section of sections) {
+            const element = document.getElementById(section);
+            if (element) {
+              const offsetTop = element.offsetTop;
+              const offsetBottom = offsetTop + element.offsetHeight;
 
-          if (scrollPosition >= offsetTop && scrollPosition < offsetBottom) {
-            setActiveSection(section);
-            break;
+              if (scrollPosition >= offsetTop && scrollPosition < offsetBottom) {
+                setActiveSection(section);
+                break;
+              }
+            }
           }
-        }
+          
+          ticking = false;
+        });
+        
+        ticking = true;
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -72,16 +72,16 @@ export function Navigation({ socialLinks }: NavigationProps) {
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ type: "spring", stiffness: 100 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-2xl border-b border-slate-200 dark:border-slate-800'
+          ? 'bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-lg border-b border-slate-200 dark:border-slate-800'
           : 'bg-transparent'
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
+          {/* Logo - SIMPLIFIED */}
           <motion.a
             href="#home"
             onClick={(e) => {
@@ -92,38 +92,22 @@ export function Navigation({ socialLinks }: NavigationProps) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            {/* Glow Effect */}
-            <motion.div
-              animate={isScrolled ? {} : {
-                scale: [1, 1.2, 1],
-                opacity: [0.3, 0.6, 0.3]
-              }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl blur-lg opacity-0 group-hover:opacity-50 transition-opacity"
-            />
-            
-            <div className="relative flex items-center space-x-2">
-              <motion.div
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg"
-              >
-                <Sparkles className="w-5 h-5 text-white" />
-              </motion.div>
+            <div className="flex items-center space-x-2">
+              {/* Static Icon - NO ROTATION */}
               <span className="text-xl md:text-2xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
                 Portfolio
               </span>
             </div>
           </motion.a>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - SIMPLIFIED */}
           <div className="hidden md:flex items-center">
             <div className={`flex items-center space-x-1 px-2 py-2 rounded-2xl transition-all ${
               isScrolled 
                 ? 'bg-slate-100/50 dark:bg-slate-800/50 backdrop-blur-sm' 
-                : 'bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-xl'
+                : 'bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg'
             }`}>
-              {navItems.map((item, idx) => {
+              {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeSection === item.href.substring(1);
                 
@@ -135,12 +119,9 @@ export function Navigation({ socialLinks }: NavigationProps) {
                       e.preventDefault();
                       scrollToSection(item.href);
                     }}
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`relative px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    className={`relative px-4 py-2.5 rounded-xl text-sm font-bold transition-colors ${
                       isActive
                         ? 'text-white'
                         : 'text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400'
@@ -150,7 +131,7 @@ export function Navigation({ socialLinks }: NavigationProps) {
                       <motion.div
                         layoutId="activeNav"
                         className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg"
-                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
                       />
                     )}
                     <span className="relative flex items-center space-x-2">
@@ -163,12 +144,12 @@ export function Navigation({ socialLinks }: NavigationProps) {
             </div>
           </div>
 
-          {/* Theme Toggle & Mobile Menu Button */}
+          {/* Theme Toggle & Mobile Menu - SIMPLIFIED */}
           <div className="flex items-center space-x-2">
             {/* Theme Toggle */}
             <motion.button
               onClick={toggleTheme}
-              whileHover={{ scale: 1.1, rotate: 180 }}
+              whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               className={`relative p-3 rounded-xl shadow-lg transition-all ${
                 isScrolled
@@ -181,20 +162,20 @@ export function Navigation({ socialLinks }: NavigationProps) {
                 {theme === 'dark' ? (
                   <motion.div
                     key="sun"
-                    initial={{ rotate: -180, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 180, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    transition={{ duration: 0.2 }}
                   >
                     <Sun className="w-5 h-5 text-yellow-500" />
                   </motion.div>
                 ) : (
                   <motion.div
                     key="moon"
-                    initial={{ rotate: 180, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -180, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    transition={{ duration: 0.2 }}
                   >
                     <Moon className="w-5 h-5 text-blue-600" />
                   </motion.div>
@@ -218,9 +199,9 @@ export function Navigation({ socialLinks }: NavigationProps) {
                 {isMobileMenuOpen ? (
                   <motion.div
                     key="close"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
+                    initial={{ opacity: 0, rotate: -90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: 90 }}
                     transition={{ duration: 0.2 }}
                   >
                     <X className="w-5 h-5 text-slate-700 dark:text-slate-300" />
@@ -228,9 +209,9 @@ export function Navigation({ socialLinks }: NavigationProps) {
                 ) : (
                   <motion.div
                     key="menu"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
+                    initial={{ opacity: 0, rotate: 90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: -90 }}
                     transition={{ duration: 0.2 }}
                   >
                     <Menu className="w-5 h-5 text-slate-700 dark:text-slate-300" />
@@ -242,19 +223,19 @@ export function Navigation({ socialLinks }: NavigationProps) {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - SIMPLIFIED */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 shadow-2xl"
+            transition={{ duration: 0.2 }}
+            className="md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-lg"
           >
             <div className="container mx-auto px-4 py-4">
               <div className="space-y-2">
-                {navItems.map((item, idx) => {
+                {navItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeSection === item.href.substring(1);
                   
@@ -266,41 +247,31 @@ export function Navigation({ socialLinks }: NavigationProps) {
                         e.preventDefault();
                         scrollToSection(item.href);
                       }}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.05 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`relative flex items-center space-x-3 px-5 py-3.5 rounded-2xl font-bold transition-all overflow-hidden group ${
+                      className={`relative flex items-center space-x-3 px-5 py-3.5 rounded-2xl font-bold transition-all ${
                         isActive
                           ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                       }`}
                     >
-                      {/* Hover Effect */}
-                      {!isActive && (
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                        />
-                      )}
-                      
                       {/* Icon */}
-                      <div className={`relative p-2 rounded-xl ${
+                      <div className={`p-2 rounded-xl ${
                         isActive 
                           ? 'bg-white/20' 
-                          : 'bg-slate-200 dark:bg-slate-700 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30'
+                          : 'bg-slate-200 dark:bg-slate-700'
                       }`}>
                         <Icon className="w-5 h-5" />
                       </div>
                       
                       {/* Label */}
-                      <span className="relative">{item.label}</span>
+                      <span>{item.label}</span>
                       
                       {/* Active Indicator */}
                       {isActive && (
                         <motion.div
                           layoutId="activeMobile"
                           className="absolute right-4 w-2 h-2 bg-white rounded-full"
-                          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          transition={{ type: "spring", stiffness: 380, damping: 30 }}
                         />
                       )}
                     </motion.a>
@@ -308,18 +279,13 @@ export function Navigation({ socialLinks }: NavigationProps) {
                 })}
               </div>
 
-              {/* Mobile Footer */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800"
-              >
+              {/* Mobile Footer - SIMPLIFIED */}
+              <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800">
                 <p className="text-center text-sm text-slate-600 dark:text-slate-400 flex items-center justify-center space-x-1">
                   <Sparkles className="w-4 h-4" />
                   <span>Swipe to navigate</span>
                 </p>
-              </motion.div>
+              </div>
             </div>
           </motion.div>
         )}
