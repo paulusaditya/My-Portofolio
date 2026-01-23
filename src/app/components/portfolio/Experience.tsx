@@ -1,5 +1,5 @@
-import { motion } from 'motion/react';
-import { Briefcase, Calendar, Award, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Briefcase, Calendar, Award, ChevronLeft, ChevronRight, X, MapPin, Building2, Sparkles, TrendingUp } from 'lucide-react';
 import type { Experience as ExperienceType } from '@/types/database';
 import { format } from 'date-fns';
 import { useState } from 'react';
@@ -10,6 +10,7 @@ interface ExperienceProps {
 
 export function Experience({ experiences }: ExperienceProps) {
   const [selectedImages, setSelectedImages] = useState<{ images: string[]; currentIndex: number } | null>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   if (experiences.length === 0) return null;
 
@@ -44,8 +45,29 @@ export function Experience({ experiences }: ExperienceProps) {
   };
 
   return (
-    <section id="experience" className="py-20 bg-white dark:bg-slate-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="experience" className="py-24 relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+        {/* Floating Orbs */}
+        <motion.div
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{ duration: 8, repeat: Infinity }}
+          className="absolute top-20 -left-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.2, 0.5, 0.2],
+          }}
+          transition={{ duration: 10, repeat: Infinity, delay: 1 }}
+          className="absolute bottom-20 -right-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"
+        />
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -55,170 +77,292 @@ export function Experience({ experiences }: ExperienceProps) {
           {/* Section Header */}
           <div className="text-center mb-16">
             <motion.div
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1 }}
+              initial={{ scale: 0, rotate: -180 }}
+              whileInView={{ scale: 1, rotate: 0 }}
               viewport={{ once: true }}
-              className="inline-block p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-4"
+              transition={{ type: "spring", duration: 0.8 }}
+              className="inline-block relative mb-6"
             >
-              <Briefcase className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl blur-xl opacity-50 animate-pulse" />
+              <div className="relative p-5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl shadow-2xl">
+                <Briefcase className="w-10 h-10 text-white" />
+              </div>
             </motion.div>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-              Work Experience
-            </h2>
-            <div className="w-20 h-1 bg-blue-600 mx-auto rounded-full" />
+
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="text-5xl md:text-6xl font-bold mb-4"
+            >
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+                Work Experience
+              </span>
+            </motion.h2>
+
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-8"
+            >
+              My professional journey and key accomplishments
+            </motion.p>
+
+            {/* Stats */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="inline-flex gap-4 flex-wrap justify-center"
+            >
+              <div className="px-6 py-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <div className="text-left">
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{experiences.length}</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">Positions</p>
+                  </div>
+                </div>
+              </div>
+              <div className="px-6 py-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
+                <div className="flex items-center space-x-2">
+                  <Award className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <div className="text-left">
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                      {experiences.reduce((sum, exp) => sum + (exp.certificates?.length || 0), 0)}
+                    </p>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">Certificates</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
 
           {/* Timeline */}
-          <div className="max-w-6xl mx-auto relative">
-            {/* Vertical Line */}
-            <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-slate-200 dark:bg-slate-700" />
+          <div className="max-w-7xl mx-auto relative">
+            {/* Vertical Line with Gradient */}
+            <div className="hidden lg:block absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500 opacity-20 rounded-full" />
 
             {/* Experience Items */}
             <div className="space-y-12">
               {experiences.map((exp, idx) => {
                 const certUrls = exp.certificates?.map(c => c.url) || [];
+                const isLeft = idx % 2 === 0;
                 
                 return (
                   <motion.div
                     key={exp.id}
-                    initial={{ opacity: 0, x: idx % 2 === 0 ? -50 : 50 }}
+                    initial={{ opacity: 0, x: isLeft ? -50 : 50 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: idx * 0.1 }}
-                    className={`relative grid md:grid-cols-2 gap-6 items-start ${
-                      idx % 2 === 0 ? '' : 'md:flex-row-reverse'
-                    }`}
+                    transition={{ delay: idx * 0.1, type: "spring" }}
+                    onHoverStart={() => setHoveredIndex(idx)}
+                    onHoverEnd={() => setHoveredIndex(null)}
+                    className="relative"
                   >
-                    {/* Content Card */}
-                    <div className={`${idx % 2 === 0 ? '' : 'md:order-2'}`}>
+                    <div className={`grid lg:grid-cols-2 gap-8 items-start ${isLeft ? '' : 'lg:grid-flow-dense'}`}>
+                      
+                      {/* Content Card */}
                       <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6 shadow-xl h-full"
+                        className={`${isLeft ? '' : 'lg:col-start-2'} relative`}
+                        whileHover={{ scale: 1.02, y: -5 }}
                       >
-                        {/* Company & Position */}
-                        <div className="mb-4">
-                          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">
-                            {exp.position}
-                          </h3>
-                          <p className="text-blue-600 dark:text-blue-400 font-semibold">
-                            {exp.company}
-                          </p>
-                        </div>
+                        <div className="relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl p-8 shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.3)] transition-all overflow-hidden group">
+                          {/* Decorative Gradient */}
+                          <motion.div
+                            animate={{
+                              scale: hoveredIndex === idx ? 1.5 : 1,
+                              rotate: hoveredIndex === idx ? 180 : 0,
+                            }}
+                            transition={{ duration: 0.5 }}
+                            className="absolute -top-20 -right-20 w-60 h-60 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-full blur-3xl"
+                          />
 
-                        {/* Date */}
-                        <div className="flex items-center space-x-2 text-sm text-slate-600 dark:text-slate-400 mb-4">
-                          <Calendar className="w-4 h-4" />
-                          <span>
-                            {formatDate(exp.start_date)} - {exp.is_current ? 'Present' : formatDate(exp.end_date || exp.start_date)}
-                          </span>
+                          {/* Current Badge */}
                           {exp.is_current && (
-                            <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
-                              Current
+                            <motion.div
+                              initial={{ scale: 0, rotate: -180 }}
+                              animate={{ scale: 1, rotate: 0 }}
+                              transition={{ type: "spring" }}
+                              className="absolute top-6 right-6"
+                            >
+                              <div className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold rounded-full shadow-lg flex items-center space-x-1">
+                                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                                <span>Current</span>
+                              </div>
+                            </motion.div>
+                          )}
+
+                          {/* Company Icon & Info */}
+                          <div className="relative flex items-start space-x-4 mb-6">
+                            <motion.div
+                              whileHover={{ rotate: 360, scale: 1.1 }}
+                              transition={{ duration: 0.6 }}
+                              className="flex-shrink-0 p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-xl"
+                            >
+                              <Building2 className="w-8 h-8 text-white" />
+                            </motion.div>
+                            <div className="flex-1">
+                              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                                {exp.position}
+                              </h3>
+                              <p className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+                                {exp.company}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Date Badge */}
+                          <div className="relative inline-flex items-center space-x-2 px-4 py-2 bg-slate-100 dark:bg-slate-700/50 rounded-xl mb-6 text-sm">
+                            <Calendar className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">
+                              {formatDate(exp.start_date)} - {exp.is_current ? 'Present' : formatDate(exp.end_date || exp.start_date)}
                             </span>
+                          </div>
+
+                          {/* Description */}
+                          <p className="relative text-slate-700 dark:text-slate-300 leading-relaxed mb-6">
+                            {exp.description}
+                          </p>
+
+                          {/* Technologies */}
+                          {exp.technologies && exp.technologies.length > 0 && (
+                            <div className="relative">
+                              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-3 flex items-center space-x-2">
+                                <Sparkles className="w-4 h-4" />
+                                <span>Technologies Used</span>
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {exp.technologies.map((tech, i) => (
+                                  <motion.span
+                                    key={i}
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    whileInView={{ scale: 1, opacity: 1 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: idx * 0.1 + i * 0.05 }}
+                                    whileHover={{ scale: 1.1, y: -2 }}
+                                    className="px-4 py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 dark:border-purple-500/20 text-blue-700 dark:text-blue-400 text-sm font-semibold rounded-xl"
+                                  >
+                                    {tech}
+                                  </motion.span>
+                                ))}
+                              </div>
+                            </div>
                           )}
                         </div>
+                      </motion.div>
 
-                        {/* Description */}
-                        <p className="text-slate-700 dark:text-slate-300 mb-4">
-                          {exp.description}
-                        </p>
+                      {/* Certificates Gallery Card */}
+                      <motion.div
+                        className={`${isLeft ? '' : 'lg:col-start-1'} relative`}
+                        whileHover={{ scale: 1.02, y: -5 }}
+                      >
+                        {certUrls.length > 0 ? (
+                          <div className="relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl p-6 shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.3)] transition-all overflow-hidden h-full">
+                            {/* Decorative Badge */}
+                            <div className="absolute top-6 right-6 z-10">
+                              <div className="px-3 py-1.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold rounded-full shadow-lg flex items-center space-x-1">
+                                <Award className="w-3 h-3" />
+                                <span>{certUrls.length}</span>
+                              </div>
+                            </div>
 
-                        {/* Technologies */}
-                        {exp.technologies && exp.technologies.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {exp.technologies.map((tech, i) => (
-                              <span
-                                key={i}
-                                className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-full"
+                            {certUrls.length === 1 ? (
+                              // Single Certificate
+                              <div 
+                                className="relative aspect-[4/3] rounded-2xl overflow-hidden group cursor-pointer"
+                                onClick={() => openGallery(certUrls, 0)}
                               >
-                                {tech}
-                              </span>
-                            ))}
+                                <img
+                                  src={certUrls[0]}
+                                  alt={exp.certificates?.[0]?.alt || `Certificate for ${exp.position}`}
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                  <div className="text-center">
+                                    <Award className="w-12 h-12 text-white mx-auto mb-2" />
+                                    <span className="text-white font-bold text-lg">View Certificate</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              // Multiple Certificates Grid
+                              <div className="grid grid-cols-2 gap-3">
+                                {certUrls.slice(0, 4).map((url, certIdx) => (
+                                  <motion.div
+                                    key={certIdx}
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    transition={{ delay: idx * 0.1 + certIdx * 0.1 }}
+                                    className={`relative rounded-2xl overflow-hidden group cursor-pointer ${
+                                      certUrls.length === 2 ? 'aspect-[4/3]' : 
+                                      certIdx === 0 ? 'col-span-2 aspect-[16/9]' : 'aspect-square'
+                                    }`}
+                                    onClick={() => openGallery(certUrls, certIdx)}
+                                    whileHover={{ scale: 1.05 }}
+                                  >
+                                    <img
+                                      src={url}
+                                      alt={exp.certificates?.[certIdx]?.alt || `Certificate ${certIdx + 1}`}
+                                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                    {certIdx === 3 && certUrls.length > 4 && (
+                                      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/90 to-purple-600/90 flex items-center justify-center backdrop-blur-sm">
+                                        <div className="text-center">
+                                          <span className="text-white text-4xl font-black">
+                                            +{certUrls.length - 4}
+                                          </span>
+                                          <p className="text-white text-sm font-semibold mt-1">More</p>
+                                        </div>
+                                      </div>
+                                    )}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-3">
+                                      <Award className="w-6 h-6 text-white" />
+                                    </div>
+                                  </motion.div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          // No Certificate Placeholder
+                          <div className="relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl p-6 shadow-2xl h-full flex items-center justify-center overflow-hidden">
+                            <motion.div
+                              animate={{ y: [0, -10, 0] }}
+                              transition={{ duration: 3, repeat: Infinity }}
+                              className="text-center"
+                            >
+                              <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-slate-300 to-slate-400 dark:from-slate-700 dark:to-slate-600 rounded-2xl flex items-center justify-center">
+                                <Award className="w-12 h-12 text-slate-400 dark:text-slate-500" />
+                              </div>
+                              <p className="text-slate-400 dark:text-slate-600 font-medium">No certificate available</p>
+                            </motion.div>
                           </div>
                         )}
                       </motion.div>
                     </div>
 
-                    {/* Certificates Gallery Card */}
-                    <div className={`${idx % 2 === 0 ? '' : 'md:order-1'}`}>
-                      {certUrls.length > 0 ? (
-                        <motion.div
-                          whileHover={{ scale: 1.02 }}
-                          className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 shadow-xl h-full"
-                        >
-                          {certUrls.length === 1 ? (
-                            // Single Certificate
-                            <div 
-                              className="relative aspect-[4/3] rounded-lg overflow-hidden group cursor-pointer"
-                              onClick={() => openGallery(certUrls, 0)}
-                            >
-                              <img
-                                src={certUrls[0]}
-                                alt={exp.certificates?.[0]?.alt || `Certificate for ${exp.position}`}
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
-                                <div className="flex items-center space-x-2 text-white">
-                                  <Award className="w-5 h-5" />
-                                  <span className="text-sm font-medium">View Certificate</span>
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            // Multiple Certificates Grid
-                            <div className="grid grid-cols-2 gap-2">
-                              {certUrls.slice(0, 4).map((url, certIdx) => (
-                                <div
-                                  key={certIdx}
-                                  className={`relative rounded-lg overflow-hidden group cursor-pointer ${
-                                    certUrls.length === 2 ? 'aspect-[4/3]' : 
-                                    certIdx === 0 ? 'col-span-2 aspect-[16/9]' : 'aspect-square'
-                                  }`}
-                                  onClick={() => openGallery(certUrls, certIdx)}
-                                >
-                                  <img
-                                    src={url}
-                                    alt={exp.certificates?.[certIdx]?.alt || `Certificate ${certIdx + 1}`}
-                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                                  />
-                                  {certIdx === 3 && certUrls.length > 4 && (
-                                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                      <span className="text-white text-2xl font-bold">
-                                        +{certUrls.length - 4}
-                                      </span>
-                                    </div>
-                                  )}
-                                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-2">
-                                    <Award className="w-4 h-4 text-white" />
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          
-                          {/* Certificate Count */}
-                          {certUrls.length > 1 && (
-                            <div className="mt-3 text-center">
-                              <span className="text-xs text-slate-600 dark:text-slate-400 flex items-center justify-center gap-1">
-                                <Award className="w-3 h-3" />
-                                {certUrls.length} certificate{certUrls.length > 1 ? 's' : ''}
-                              </span>
-                            </div>
-                          )}
-                        </motion.div>
-                      ) : (
-                        // No Certificate Placeholder
-                        <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 shadow-xl h-full flex items-center justify-center">
-                          <div className="text-center text-slate-400 dark:text-slate-600">
-                            <Award className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                            <p className="text-sm">No certificate available</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
                     {/* Timeline Dot */}
-                    <div className="hidden md:flex absolute left-1/2 top-8 transform -translate-x-1/2 w-4 h-4 bg-blue-600 rounded-full border-4 border-white dark:border-slate-900 z-10" />
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      whileInView={{ scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: idx * 0.1 + 0.3, type: "spring" }}
+                      className="hidden lg:flex absolute left-1/2 top-12 transform -translate-x-1/2 z-20"
+                    >
+                      <div className="relative">
+                        <motion.div
+                          animate={hoveredIndex === idx ? { scale: [1, 1.3, 1] } : {}}
+                          transition={{ duration: 0.5 }}
+                          className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full shadow-xl"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full blur-md opacity-50" />
+                      </div>
+                    </motion.div>
                   </motion.div>
                 );
               })}
@@ -227,87 +371,107 @@ export function Experience({ experiences }: ExperienceProps) {
         </motion.div>
       </div>
 
-      {/* Image Gallery Modal */}
-      {selectedImages && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
-          onClick={closeGallery}
-        >
+      {/* Enhanced Image Gallery Modal */}
+      <AnimatePresence>
+        {selectedImages && (
           <motion.div
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            className="relative max-w-5xl w-full"
-            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={closeGallery}
           >
-            {/* Close Button */}
-            <button
-              onClick={closeGallery}
-              className="absolute -top-12 right-0 text-white hover:text-slate-300 flex items-center gap-2"
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="relative max-w-6xl w-full"
+              onClick={(e) => e.stopPropagation()}
             >
-              <span className="text-sm font-medium">Close</span>
-              <X className="w-5 h-5" />
-            </button>
-
-            {/* Image Counter */}
-            <div className="absolute -top-12 left-0 text-white text-sm">
-              {selectedImages.currentIndex + 1} / {selectedImages.images.length}
-            </div>
-
-            {/* Main Image */}
-            <div className="relative">
-              <img
-                src={selectedImages.images[selectedImages.currentIndex]}
-                alt={`Certificate ${selectedImages.currentIndex + 1}`}
-                className="w-full h-auto rounded-lg shadow-2xl"
-              />
-
-              {/* Navigation Arrows */}
-              {selectedImages.images.length > 1 && (
-                <>
-                  <button
-                    onClick={prevImage}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-full transition-all"
-                  >
-                    <ChevronLeft className="w-6 h-6" />
-                  </button>
-                  <button
-                    onClick={nextImage}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-full transition-all"
-                  >
-                    <ChevronRight className="w-6 h-6" />
-                  </button>
-                </>
-              )}
-            </div>
-
-            {/* Thumbnails */}
-            {selectedImages.images.length > 1 && (
-              <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
-                {selectedImages.images.map((url, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedImages({ ...selectedImages, currentIndex: idx })}
-                    className={`flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                      idx === selectedImages.currentIndex
-                        ? 'border-blue-500 scale-105'
-                        : 'border-transparent opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    <img
-                      src={url}
-                      alt={`Thumbnail ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-4">
+                  <div className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl text-white font-semibold">
+                    {selectedImages.currentIndex + 1} / {selectedImages.images.length}
+                  </div>
+                </div>
+                <motion.button
+                  onClick={closeGallery}
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-xl transition-all flex items-center space-x-2"
+                >
+                  <span className="text-sm font-medium">Close</span>
+                  <X className="w-5 h-5" />
+                </motion.button>
               </div>
-            )}
+
+              {/* Main Image */}
+              <motion.div
+                key={selectedImages.currentIndex}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+                className="relative"
+              >
+                <img
+                  src={selectedImages.images[selectedImages.currentIndex]}
+                  alt={`Certificate ${selectedImages.currentIndex + 1}`}
+                  className="w-full h-auto rounded-2xl shadow-2xl"
+                />
+
+                {/* Navigation Arrows */}
+                {selectedImages.images.length > 1 && (
+                  <>
+                    <motion.button
+                      onClick={prevImage}
+                      whileHover={{ scale: 1.1, x: -5 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 p-4 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white rounded-2xl transition-all shadow-xl"
+                    >
+                      <ChevronLeft className="w-6 h-6" />
+                    </motion.button>
+                    <motion.button
+                      onClick={nextImage}
+                      whileHover={{ scale: 1.1, x: 5 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 p-4 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white rounded-2xl transition-all shadow-xl"
+                    >
+                      <ChevronRight className="w-6 h-6" />
+                    </motion.button>
+                  </>
+                )}
+              </motion.div>
+
+              {/* Enhanced Thumbnails */}
+              {selectedImages.images.length > 1 && (
+                <div className="flex gap-3 mt-6 overflow-x-auto pb-2 scrollbar-hide">
+                  {selectedImages.images.map((url, idx) => (
+                    <motion.button
+                      key={idx}
+                      onClick={() => setSelectedImages({ ...selectedImages, currentIndex: idx })}
+                      whileHover={{ scale: 1.1, y: -5 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                        idx === selectedImages.currentIndex
+                          ? 'border-blue-500 shadow-lg shadow-blue-500/50 scale-105'
+                          : 'border-white/20 opacity-60 hover:opacity-100'
+                      }`}
+                    >
+                      <img
+                        src={url}
+                        alt={`Thumbnail ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </motion.button>
+                  ))}
+                </div>
+              )}
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
     </section>
   );
 }
