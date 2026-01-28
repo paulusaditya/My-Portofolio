@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { Briefcase, Calendar, Award, ChevronLeft, ChevronRight, X, MapPin, Building2, Sparkles, TrendingUp } from 'lucide-react';
+import { Briefcase, Calendar, Award, ChevronLeft, ChevronRight, X, Building2, Sparkles, TrendingUp } from 'lucide-react';
 import type { Experience as ExperienceType } from '@/types/database';
 import { format } from 'date-fns';
 import { useState } from 'react';
@@ -8,9 +8,17 @@ interface ExperienceProps {
   experiences: ExperienceType[];
 }
 
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (delay: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay, ease: "easeOut" }
+  })
+};
+
 export function Experience({ experiences }: ExperienceProps) {
   const [selectedImages, setSelectedImages] = useState<{ images: string[]; currentIndex: number } | null>(null);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   if (experiences.length === 0) return null;
 
@@ -46,54 +54,35 @@ export function Experience({ experiences }: ExperienceProps) {
 
   return (
     <section id="experience" className="py-24 relative overflow-hidden">
-      {/* Animated Background */}
+      {/* Simplified Static Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-        {/* Floating Orbs */}
-        <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-20 -left-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.5, 0.2],
-          }}
-          transition={{ duration: 10, repeat: Infinity, delay: 1 }}
-          className="absolute bottom-20 -right-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"
-        />
+        {/* Static Orbs - No Animation */}
+        <div className="absolute top-20 -left-20 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 -right-20 w-96 h-96 bg-purple-500/15 rounded-full blur-3xl" />
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
         >
           {/* Section Header */}
           <div className="text-center mb-16">
             <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              whileInView={{ scale: 1, rotate: 0 }}
-              viewport={{ once: true }}
-              transition={{ type: "spring", duration: 0.8 }}
+              variants={fadeInUp}
+              custom={0}
               className="inline-block relative mb-6"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl blur-xl opacity-50 animate-pulse" />
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl blur-xl opacity-40" />
               <div className="relative p-5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl shadow-2xl">
                 <Briefcase className="w-10 h-10 text-white" />
               </div>
             </motion.div>
 
             <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
+              variants={fadeInUp}
+              custom={0.1}
               className="text-5xl md:text-6xl font-bold mb-4"
             >
               <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
@@ -102,10 +91,8 @@ export function Experience({ experiences }: ExperienceProps) {
             </motion.h2>
 
             <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
+              variants={fadeInUp}
+              custom={0.2}
               className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-8"
             >
               My professional journey and key accomplishments
@@ -113,10 +100,8 @@ export function Experience({ experiences }: ExperienceProps) {
 
             {/* Stats */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4 }}
+              variants={fadeInUp}
+              custom={0.3}
               className="inline-flex gap-4 flex-wrap justify-center"
             >
               <div className="px-6 py-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
@@ -144,7 +129,7 @@ export function Experience({ experiences }: ExperienceProps) {
 
           {/* Timeline */}
           <div className="max-w-7xl mx-auto relative">
-            {/* Vertical Line with Gradient */}
+            {/* Static Vertical Line */}
             <div className="hidden lg:block absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500 opacity-20 rounded-full" />
 
             {/* Experience Items */}
@@ -156,56 +141,35 @@ export function Experience({ experiences }: ExperienceProps) {
                 return (
                   <motion.div
                     key={exp.id}
-                    initial={{ opacity: 0, x: isLeft ? -50 : 50 }}
+                    initial={{ opacity: 0, x: isLeft ? -30 : 30 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: idx * 0.1, type: "spring" }}
-                    onHoverStart={() => setHoveredIndex(idx)}
-                    onHoverEnd={() => setHoveredIndex(null)}
+                    transition={{ delay: idx * 0.1, duration: 0.5, ease: "easeOut" }}
                     className="relative"
                   >
                     <div className={`grid lg:grid-cols-2 gap-8 items-start ${isLeft ? '' : 'lg:grid-flow-dense'}`}>
                       
                       {/* Content Card */}
-                      <motion.div
-                        className={`${isLeft ? '' : 'lg:col-start-2'} relative`}
-                        whileHover={{ scale: 1.02, y: -5 }}
-                      >
-                        <div className="relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl p-8 shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.3)] transition-all overflow-hidden group">
-                          {/* Decorative Gradient */}
-                          <motion.div
-                            animate={{
-                              scale: hoveredIndex === idx ? 1.5 : 1,
-                              rotate: hoveredIndex === idx ? 180 : 0,
-                            }}
-                            transition={{ duration: 0.5 }}
-                            className="absolute -top-20 -right-20 w-60 h-60 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-full blur-3xl"
-                          />
+                      <div className={`${isLeft ? '' : 'lg:col-start-2'} relative`}>
+                        <div className="relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl p-8 shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-shadow overflow-hidden group">
+                          {/* Static Decorative Gradient */}
+                          <div className="absolute -top-20 -right-20 w-60 h-60 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-full blur-3xl" />
 
                           {/* Current Badge */}
                           {exp.is_current && (
-                            <motion.div
-                              initial={{ scale: 0, rotate: -180 }}
-                              animate={{ scale: 1, rotate: 0 }}
-                              transition={{ type: "spring" }}
-                              className="absolute top-6 right-6"
-                            >
+                            <div className="absolute top-6 right-6">
                               <div className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold rounded-full shadow-lg flex items-center space-x-1">
                                 <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
                                 <span>Current</span>
                               </div>
-                            </motion.div>
+                            </div>
                           )}
 
                           {/* Company Icon & Info */}
                           <div className="relative flex items-start space-x-4 mb-6">
-                            <motion.div
-                              whileHover={{ rotate: 360, scale: 1.1 }}
-                              transition={{ duration: 0.6 }}
-                              className="flex-shrink-0 p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-xl"
-                            >
+                            <div className="flex-shrink-0 p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-xl">
                               <Building2 className="w-8 h-8 text-white" />
-                            </motion.div>
+                            </div>
                             <div className="flex-1">
                               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
                                 {exp.position}
@@ -238,31 +202,23 @@ export function Experience({ experiences }: ExperienceProps) {
                               </p>
                               <div className="flex flex-wrap gap-2">
                                 {exp.technologies.map((tech, i) => (
-                                  <motion.span
+                                  <span
                                     key={i}
-                                    initial={{ scale: 0, opacity: 0 }}
-                                    whileInView={{ scale: 1, opacity: 1 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: idx * 0.1 + i * 0.05 }}
-                                    whileHover={{ scale: 1.1, y: -2 }}
                                     className="px-4 py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 dark:border-purple-500/20 text-blue-700 dark:text-blue-400 text-sm font-semibold rounded-xl"
                                   >
                                     {tech}
-                                  </motion.span>
+                                  </span>
                                 ))}
                               </div>
                             </div>
                           )}
                         </div>
-                      </motion.div>
+                      </div>
 
                       {/* Certificates Gallery Card */}
-                      <motion.div
-                        className={`${isLeft ? '' : 'lg:col-start-1'} relative`}
-                        whileHover={{ scale: 1.02, y: -5 }}
-                      >
+                      <div className={`${isLeft ? '' : 'lg:col-start-1'} relative`}>
                         {certUrls.length > 0 ? (
-                          <div className="relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl p-6 shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.3)] transition-all overflow-hidden h-full">
+                          <div className="relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl p-6 shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-shadow overflow-hidden h-full">
                             {/* Decorative Badge */}
                             <div className="absolute top-6 right-6 z-10">
                               <div className="px-3 py-1.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold rounded-full shadow-lg flex items-center space-x-1">
@@ -293,17 +249,13 @@ export function Experience({ experiences }: ExperienceProps) {
                               // Multiple Certificates Grid
                               <div className="grid grid-cols-2 gap-3">
                                 {certUrls.slice(0, 4).map((url, certIdx) => (
-                                  <motion.div
+                                  <div
                                     key={certIdx}
-                                    initial={{ scale: 0, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    transition={{ delay: idx * 0.1 + certIdx * 0.1 }}
                                     className={`relative rounded-2xl overflow-hidden group cursor-pointer ${
                                       certUrls.length === 2 ? 'aspect-[4/3]' : 
                                       certIdx === 0 ? 'col-span-2 aspect-[16/9]' : 'aspect-square'
                                     }`}
                                     onClick={() => openGallery(certUrls, certIdx)}
-                                    whileHover={{ scale: 1.05 }}
                                   >
                                     <img
                                       src={url}
@@ -323,7 +275,7 @@ export function Experience({ experiences }: ExperienceProps) {
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-3">
                                       <Award className="w-6 h-6 text-white" />
                                     </div>
-                                  </motion.div>
+                                  </div>
                                 ))}
                               </div>
                             )}
@@ -331,38 +283,24 @@ export function Experience({ experiences }: ExperienceProps) {
                         ) : (
                           // No Certificate Placeholder
                           <div className="relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl p-6 shadow-2xl h-full flex items-center justify-center overflow-hidden">
-                            <motion.div
-                              animate={{ y: [0, -10, 0] }}
-                              transition={{ duration: 3, repeat: Infinity }}
-                              className="text-center"
-                            >
+                            <div className="text-center">
                               <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-slate-300 to-slate-400 dark:from-slate-700 dark:to-slate-600 rounded-2xl flex items-center justify-center">
                                 <Award className="w-12 h-12 text-slate-400 dark:text-slate-500" />
                               </div>
                               <p className="text-slate-400 dark:text-slate-600 font-medium">No certificate available</p>
-                            </motion.div>
+                            </div>
                           </div>
                         )}
-                      </motion.div>
+                      </div>
                     </div>
 
-                    {/* Timeline Dot */}
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      whileInView={{ scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: idx * 0.1 + 0.3, type: "spring" }}
-                      className="hidden lg:flex absolute left-1/2 top-12 transform -translate-x-1/2 z-20"
-                    >
+                    {/* Timeline Dot - Static version */}
+                    <div className="hidden lg:flex absolute left-1/2 top-12 transform -translate-x-1/2 z-20">
                       <div className="relative">
-                        <motion.div
-                          animate={hoveredIndex === idx ? { scale: [1, 1.3, 1] } : {}}
-                          transition={{ duration: 0.5 }}
-                          className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full shadow-xl"
-                        />
+                        <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full shadow-xl" />
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full blur-md opacity-50" />
                       </div>
-                    </motion.div>
+                    </div>
                   </motion.div>
                 );
               })}
@@ -371,7 +309,7 @@ export function Experience({ experiences }: ExperienceProps) {
         </motion.div>
       </div>
 
-      {/* Enhanced Image Gallery Modal */}
+      {/* Image Gallery Modal */}
       <AnimatePresence>
         {selectedImages && (
           <motion.div
@@ -381,38 +319,28 @@ export function Experience({ experiences }: ExperienceProps) {
             className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             onClick={closeGallery}
           >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="relative max-w-6xl w-full"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <div className="relative max-w-6xl w-full" onClick={(e) => e.stopPropagation()}>
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-4">
-                  <div className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl text-white font-semibold">
-                    {selectedImages.currentIndex + 1} / {selectedImages.images.length}
-                  </div>
+                <div className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl text-white font-semibold">
+                  {selectedImages.currentIndex + 1} / {selectedImages.images.length}
                 </div>
-                <motion.button
+                <button
                   onClick={closeGallery}
-                  whileHover={{ scale: 1.1, rotate: 90 }}
-                  whileTap={{ scale: 0.9 }}
                   className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-xl transition-all flex items-center space-x-2"
                 >
                   <span className="text-sm font-medium">Close</span>
                   <X className="w-5 h-5" />
-                </motion.button>
+                </button>
               </div>
 
               {/* Main Image */}
               <motion.div
                 key={selectedImages.currentIndex}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.3 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
                 className="relative"
               >
                 <img
@@ -424,35 +352,29 @@ export function Experience({ experiences }: ExperienceProps) {
                 {/* Navigation Arrows */}
                 {selectedImages.images.length > 1 && (
                   <>
-                    <motion.button
+                    <button
                       onClick={prevImage}
-                      whileHover={{ scale: 1.1, x: -5 }}
-                      whileTap={{ scale: 0.9 }}
                       className="absolute left-4 top-1/2 -translate-y-1/2 p-4 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white rounded-2xl transition-all shadow-xl"
                     >
                       <ChevronLeft className="w-6 h-6" />
-                    </motion.button>
-                    <motion.button
+                    </button>
+                    <button
                       onClick={nextImage}
-                      whileHover={{ scale: 1.1, x: 5 }}
-                      whileTap={{ scale: 0.9 }}
                       className="absolute right-4 top-1/2 -translate-y-1/2 p-4 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white rounded-2xl transition-all shadow-xl"
                     >
                       <ChevronRight className="w-6 h-6" />
-                    </motion.button>
+                    </button>
                   </>
                 )}
               </motion.div>
 
-              {/* Enhanced Thumbnails */}
+              {/* Thumbnails */}
               {selectedImages.images.length > 1 && (
-                <div className="flex gap-3 mt-6 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex gap-3 mt-6 overflow-x-auto pb-2">
                   {selectedImages.images.map((url, idx) => (
-                    <motion.button
+                    <button
                       key={idx}
                       onClick={() => setSelectedImages({ ...selectedImages, currentIndex: idx })}
-                      whileHover={{ scale: 1.1, y: -5 }}
-                      whileTap={{ scale: 0.95 }}
                       className={`flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border-2 transition-all ${
                         idx === selectedImages.currentIndex
                           ? 'border-blue-500 shadow-lg shadow-blue-500/50 scale-105'
@@ -464,11 +386,11 @@ export function Experience({ experiences }: ExperienceProps) {
                         alt={`Thumbnail ${idx + 1}`}
                         className="w-full h-full object-cover"
                       />
-                    </motion.button>
+                    </button>
                   ))}
                 </div>
               )}
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
