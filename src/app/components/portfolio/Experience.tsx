@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { Briefcase, Calendar, Award, ChevronLeft, ChevronRight, X, Building2, Sparkles, TrendingUp } from 'lucide-react';
+import { Briefcase, Calendar, Award, ChevronLeft, ChevronRight, X, Building2, Sparkles, TrendingUp, Image } from 'lucide-react';
 import type { Experience as ExperienceType } from '@/types/database';
 import { format } from 'date-fns';
 import { useState } from 'react';
@@ -137,12 +137,12 @@ export function Experience({ experiences }: ExperienceProps) {
               </div>
               <div className="px-6 py-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center space-x-2">
-                  <Award className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <Image className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                   <div className="text-left">
                     <p className="text-2xl font-bold text-slate-900 dark:text-white">
                       {sortedExperiences.reduce((sum, exp) => sum + (exp.certificates?.length || 0), 0)}
                     </p>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">Certificates</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">Images</p>
                   </div>
                 </div>
               </div>
@@ -157,7 +157,7 @@ export function Experience({ experiences }: ExperienceProps) {
             {/* Experience Items */}
             <div className="space-y-12">
               {sortedExperiences.map((exp, idx) => {
-                const certUrls = exp.certificates?.map(c => c.url) || [];
+                const imageUrls = exp.certificates?.map(c => c.url) || [];
                 const isLeft = idx % 2 === 0;
                 const currentCarouselIndex = carouselIndexes[exp.id] || 0;
                 
@@ -238,15 +238,15 @@ export function Experience({ experiences }: ExperienceProps) {
                         </div>
                       </div>
 
-                      {/* Certificates Carousel Card */}
+                      {/* Image Gallery Carousel Card */}
                       <div className={`${isLeft ? '' : 'lg:col-start-1'} relative`}>
-                        {certUrls.length > 0 ? (
+                        {imageUrls.length > 0 ? (
                           <div className="relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl p-6 shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-shadow overflow-hidden h-full">
                             {/* Counter Badge */}
                             <div className="absolute top-6 right-6 z-10">
                               <div className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-sm font-bold rounded-full shadow-lg flex items-center space-x-2">
-                                <Award className="w-4 h-4" />
-                                <span>{currentCarouselIndex + 1} / {certUrls.length}</span>
+                                <Image className="w-4 h-4" />
+                                <span>{currentCarouselIndex + 1} / {imageUrls.length}</span>
                               </div>
                             </div>
 
@@ -261,11 +261,11 @@ export function Experience({ experiences }: ExperienceProps) {
                                   exit={{ opacity: 0, x: -50 }}
                                   transition={{ duration: 0.3 }}
                                   className="w-full h-full cursor-pointer"
-                                  onClick={() => openGallery(certUrls, currentCarouselIndex)}
+                                  onClick={() => openGallery(imageUrls, currentCarouselIndex)}
                                 >
                                   <img
-                                    src={certUrls[currentCarouselIndex]}
-                                    alt={exp.certificates?.[currentCarouselIndex]?.alt || `Certificate ${currentCarouselIndex + 1}`}
+                                    src={imageUrls[currentCarouselIndex]}
+                                    alt={exp.certificates?.[currentCarouselIndex]?.alt || `Image ${currentCarouselIndex + 1} for ${exp.position}`}
                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                   />
                                 </motion.div>
@@ -274,18 +274,18 @@ export function Experience({ experiences }: ExperienceProps) {
                               {/* Overlay on Hover */}
                               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
                                 <div className="text-center">
-                                  <Award className="w-12 h-12 text-white mx-auto mb-2" />
-                                  <span className="text-white font-bold text-lg">View Certificate</span>
+                                  <Image className="w-12 h-12 text-white mx-auto mb-2" />
+                                  <span className="text-white font-bold text-lg">View Gallery</span>
                                 </div>
                               </div>
 
                               {/* Navigation Arrows */}
-                              {certUrls.length > 1 && (
+                              {imageUrls.length > 1 && (
                                 <>
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      prevCarouselImage(exp.id, certUrls.length);
+                                      prevCarouselImage(exp.id, imageUrls.length);
                                     }}
                                     className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 bg-black/60 hover:bg-black/80 backdrop-blur-sm text-white rounded-full transition-all shadow-xl z-10 opacity-0 group-hover:opacity-100"
                                   >
@@ -294,7 +294,7 @@ export function Experience({ experiences }: ExperienceProps) {
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      nextCarouselImage(exp.id, certUrls.length);
+                                      nextCarouselImage(exp.id, imageUrls.length);
                                     }}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-black/60 hover:bg-black/80 backdrop-blur-sm text-white rounded-full transition-all shadow-xl z-10 opacity-0 group-hover:opacity-100"
                                   >
@@ -305,9 +305,9 @@ export function Experience({ experiences }: ExperienceProps) {
                             </div>
 
                             {/* Dot Indicators */}
-                            {certUrls.length > 1 && (
+                            {imageUrls.length > 1 && (
                               <div className="flex justify-center gap-2 mt-4">
-                                {certUrls.map((_, dotIdx) => (
+                                {imageUrls.map((_, dotIdx) => (
                                   <button
                                     key={dotIdx}
                                     onClick={() => setCarouselIndexes(prev => ({ ...prev, [exp.id]: dotIdx }))}
@@ -322,13 +322,13 @@ export function Experience({ experiences }: ExperienceProps) {
                             )}
                           </div>
                         ) : (
-                          // No Certificate Placeholder
+                          // No Image Placeholder
                           <div className="relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl p-6 shadow-2xl h-full flex items-center justify-center overflow-hidden">
                             <div className="text-center">
                               <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-slate-300 to-slate-400 dark:from-slate-700 dark:to-slate-600 rounded-2xl flex items-center justify-center">
-                                <Award className="w-12 h-12 text-slate-400 dark:text-slate-500" />
+                                <Image className="w-12 h-12 text-slate-400 dark:text-slate-500" />
                               </div>
-                              <p className="text-slate-400 dark:text-slate-600 font-medium">No certificate available</p>
+                              <p className="text-slate-400 dark:text-slate-600 font-medium">No images available</p>
                             </div>
                           </div>
                         )}
@@ -386,7 +386,7 @@ export function Experience({ experiences }: ExperienceProps) {
               >
                 <img
                   src={selectedImages.images[selectedImages.currentIndex]}
-                  alt={`Certificate ${selectedImages.currentIndex + 1}`}
+                  alt={`Image ${selectedImages.currentIndex + 1}`}
                   className="w-full h-auto rounded-2xl shadow-2xl"
                 />
 
