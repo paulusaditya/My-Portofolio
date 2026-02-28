@@ -21,7 +21,14 @@ export function Experience({ experiences }: ExperienceProps) {
   const [selectedImages, setSelectedImages] = useState<{ images: string[]; currentIndex: number } | null>(null);
   const [carouselIndexes, setCarouselIndexes] = useState<{ [key: string]: number }>({});
 
-  if (experiences.length === 0) return null;
+  // Sort experiences by date (most recent first)
+  const sortedExperiences = [...experiences].sort((a, b) => {
+    const dateA = new Date(a.start_date).getTime();
+    const dateB = new Date(b.start_date).getTime();
+    return dateB - dateA; // Descending order (newest first)
+  });
+
+  if (sortedExperiences.length === 0) return null;
 
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), 'MMM yyyy');
@@ -123,7 +130,7 @@ export function Experience({ experiences }: ExperienceProps) {
                 <div className="flex items-center space-x-2">
                   <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   <div className="text-left">
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{experiences.length}</p>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{sortedExperiences.length}</p>
                     <p className="text-xs text-slate-600 dark:text-slate-400">Positions</p>
                   </div>
                 </div>
@@ -133,7 +140,7 @@ export function Experience({ experiences }: ExperienceProps) {
                   <Award className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                   <div className="text-left">
                     <p className="text-2xl font-bold text-slate-900 dark:text-white">
-                      {experiences.reduce((sum, exp) => sum + (exp.certificates?.length || 0), 0)}
+                      {sortedExperiences.reduce((sum, exp) => sum + (exp.certificates?.length || 0), 0)}
                     </p>
                     <p className="text-xs text-slate-600 dark:text-slate-400">Certificates</p>
                   </div>
@@ -149,7 +156,7 @@ export function Experience({ experiences }: ExperienceProps) {
 
             {/* Experience Items */}
             <div className="space-y-12">
-              {experiences.map((exp, idx) => {
+              {sortedExperiences.map((exp, idx) => {
                 const certUrls = exp.certificates?.map(c => c.url) || [];
                 const isLeft = idx % 2 === 0;
                 const currentCarouselIndex = carouselIndexes[exp.id] || 0;
