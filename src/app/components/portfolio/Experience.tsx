@@ -19,6 +19,7 @@ const fadeInUp = {
 
 export function Experience({ experiences }: ExperienceProps) {
   const [selectedImages, setSelectedImages] = useState<{ images: string[]; currentIndex: number } | null>(null);
+  const [carouselIndexes, setCarouselIndexes] = useState<{ [key: string]: number }>({});
 
   if (experiences.length === 0) return null;
 
@@ -50,6 +51,20 @@ export function Experience({ experiences }: ExperienceProps) {
         ? selectedImages.images.length - 1 
         : selectedImages.currentIndex - 1,
     });
+  };
+
+  const nextCarouselImage = (expId: string, maxLength: number) => {
+    setCarouselIndexes(prev => ({
+      ...prev,
+      [expId]: ((prev[expId] || 0) + 1) % maxLength
+    }));
+  };
+
+  const prevCarouselImage = (expId: string, maxLength: number) => {
+    setCarouselIndexes(prev => ({
+      ...prev,
+      [expId]: (prev[expId] || 0) === 0 ? maxLength - 1 : (prev[expId] || 0) - 1
+    }));
   };
 
   return (
@@ -137,6 +152,7 @@ export function Experience({ experiences }: ExperienceProps) {
               {experiences.map((exp, idx) => {
                 const certUrls = exp.certificates?.map(c => c.url) || [];
                 const isLeft = idx % 2 === 0;
+                const currentCarouselIndex = carouselIndexes[exp.id] || 0;
                 
                 return (
                   <motion.div
@@ -215,67 +231,85 @@ export function Experience({ experiences }: ExperienceProps) {
                         </div>
                       </div>
 
-                      {/* Certificates Gallery Card */}
+                      {/* Certificates Carousel Card */}
                       <div className={`${isLeft ? '' : 'lg:col-start-1'} relative`}>
                         {certUrls.length > 0 ? (
                           <div className="relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl p-6 shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-shadow overflow-hidden h-full">
-                            {/* Decorative Badge */}
+                            {/* Counter Badge */}
                             <div className="absolute top-6 right-6 z-10">
-                              <div className="px-3 py-1.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold rounded-full shadow-lg flex items-center space-x-1">
-                                <Award className="w-3 h-3" />
-                                <span>{certUrls.length}</span>
+                              <div className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-sm font-bold rounded-full shadow-lg flex items-center space-x-2">
+                                <Award className="w-4 h-4" />
+                                <span>{currentCarouselIndex + 1} / {certUrls.length}</span>
                               </div>
                             </div>
 
-                            {certUrls.length === 1 ? (
-                              // Single Certificate
-                              <div 
-                                className="relative aspect-[4/3] rounded-2xl overflow-hidden group cursor-pointer"
-                                onClick={() => openGallery(certUrls, 0)}
-                              >
-                                <img
-                                  src={certUrls[0]}
-                                  alt={exp.certificates?.[0]?.alt || `Certificate for ${exp.position}`}
-                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                  <div className="text-center">
-                                    <Award className="w-12 h-12 text-white mx-auto mb-2" />
-                                    <span className="text-white font-bold text-lg">View Certificate</span>
-                                  </div>
+                            {/* Carousel Container */}
+                            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden group">
+                              {/* Current Image */}
+                              <AnimatePresence mode="wait">
+                                <motion.div
+                                  key={currentCarouselIndex}
+                                  initial={{ opacity: 0, x: 50 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  exit={{ opacity: 0, x: -50 }}
+                                  transition={{ duration: 0.3 }}
+                                  className="w-full h-full cursor-pointer"
+                                  onClick={() => openGallery(certUrls, currentCarouselIndex)}
+                                >
+                                  <img
+                                    src={certUrls[currentCarouselIndex]}
+                                    alt={exp.certificates?.[currentCarouselIndex]?.alt || `Certificate ${currentCarouselIndex + 1}`}
+                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                  />
+                                </motion.div>
+                              </AnimatePresence>
+
+                              {/* Overlay on Hover */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                                <div className="text-center">
+                                  <Award className="w-12 h-12 text-white mx-auto mb-2" />
+                                  <span className="text-white font-bold text-lg">View Certificate</span>
                                 </div>
                               </div>
-                            ) : (
-                              // Multiple Certificates Grid
-                              <div className="grid grid-cols-2 gap-3">
-                                {certUrls.slice(0, 4).map((url, certIdx) => (
-                                  <div
-                                    key={certIdx}
-                                    className={`relative rounded-2xl overflow-hidden group cursor-pointer ${
-                                      certUrls.length === 2 ? 'aspect-[4/3]' : 
-                                      certIdx === 0 ? 'col-span-2 aspect-[16/9]' : 'aspect-square'
-                                    }`}
-                                    onClick={() => openGallery(certUrls, certIdx)}
+
+                              {/* Navigation Arrows */}
+                              {certUrls.length > 1 && (
+                                <>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      prevCarouselImage(exp.id, certUrls.length);
+                                    }}
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 bg-black/60 hover:bg-black/80 backdrop-blur-sm text-white rounded-full transition-all shadow-xl z-10 opacity-0 group-hover:opacity-100"
                                   >
-                                    <img
-                                      src={url}
-                                      alt={exp.certificates?.[certIdx]?.alt || `Certificate ${certIdx + 1}`}
-                                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                    {certIdx === 3 && certUrls.length > 4 && (
-                                      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/90 to-purple-600/90 flex items-center justify-center backdrop-blur-sm">
-                                        <div className="text-center">
-                                          <span className="text-white text-4xl font-black">
-                                            +{certUrls.length - 4}
-                                          </span>
-                                          <p className="text-white text-sm font-semibold mt-1">More</p>
-                                        </div>
-                                      </div>
-                                    )}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-3">
-                                      <Award className="w-6 h-6 text-white" />
-                                    </div>
-                                  </div>
+                                    <ChevronLeft className="w-5 h-5" />
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      nextCarouselImage(exp.id, certUrls.length);
+                                    }}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-black/60 hover:bg-black/80 backdrop-blur-sm text-white rounded-full transition-all shadow-xl z-10 opacity-0 group-hover:opacity-100"
+                                  >
+                                    <ChevronRight className="w-5 h-5" />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+
+                            {/* Dot Indicators */}
+                            {certUrls.length > 1 && (
+                              <div className="flex justify-center gap-2 mt-4">
+                                {certUrls.map((_, dotIdx) => (
+                                  <button
+                                    key={dotIdx}
+                                    onClick={() => setCarouselIndexes(prev => ({ ...prev, [exp.id]: dotIdx }))}
+                                    className={`transition-all rounded-full ${
+                                      dotIdx === currentCarouselIndex
+                                        ? 'w-8 h-2 bg-gradient-to-r from-blue-500 to-purple-600'
+                                        : 'w-2 h-2 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500'
+                                    }`}
+                                  />
                                 ))}
                               </div>
                             )}
